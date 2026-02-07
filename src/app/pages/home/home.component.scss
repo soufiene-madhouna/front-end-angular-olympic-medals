@@ -1,0 +1,11 @@
+@media screen and (max-width: 480px) {
+  #chart-DashboardPieChart {
+    max-width: 100vw; // 100% de la largeur de l'écran
+    margin: 0 -0.5rem; // Compense le padding du parent
+    
+    canvas {
+      max-height: 500px;
+      min-height: 450px;
+    }
+  }
+}

@@ -56,7 +56,9 @@ export class HomeComponent implements OnInit {
       }
     });
   }
-
+ private isMobile(): boolean {
+    return window.innerWidth < 768;
+  }
  /**
    * Génère des couleurs distinctes de manière déterministe
    * Utilise l'index pour générer une couleur stable
@@ -81,20 +83,34 @@ export class HomeComponent implements OnInit {
 
   private buildPieChart(countries: string[], sumOfAllMedalsYears: number[]): void {
     const colors = this.generateStableColors(countries.length);
+    
     const pieChart = new Chart("DashboardPieChart", {
-     
       type: 'pie',
       data: {
         labels: countries,
         datasets: [{
           label: 'Medals',
           data: sumOfAllMedalsYears,
-          backgroundColor:  colors,
-          hoverOffset: 4
+          backgroundColor: colors,
+          borderWidth: 2,
+          borderColor: '#fff',
+          hoverOffset: this.isMobile() ? 5 : 10
         }],
       },
       options: {
-        aspectRatio: 2.5,
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            position: this.isMobile() ? 'bottom' : 'right',
+            labels: {
+              padding: this.isMobile() ? 10 : 15,
+              font: {
+                size: this.isMobile() ? 10 : 12
+              }
+            }
+          }
+        },
         onClick: (event: ChartEvent) => {
           if (event.native) {
             const points = pieChart.getElementsAtEventForMode(
@@ -113,6 +129,7 @@ export class HomeComponent implements OnInit {
         }
       }
     });
+    
     this.pieChart = pieChart;
   }
 }
