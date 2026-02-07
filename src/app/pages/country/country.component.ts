@@ -1,6 +1,7 @@
+import { CommonModule } from '@angular/common';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, ParamMap, Router} from '@angular/router';
+import {ActivatedRoute, ParamMap, Router, RouterLink} from '@angular/router';
 import Chart from 'chart.js/auto';
 import { OlympicData, Participation } from 'src/app/models/olympicModel';
 import { OlympicService } from 'src/app/services/OlympicService';
@@ -8,6 +9,8 @@ import { OlympicService } from 'src/app/services/OlympicService';
 
 @Component({
   selector: 'app-country',
+  standalone: true,
+  imports: [CommonModule,RouterLink],
   templateUrl: './country.component.html',
   styleUrls: ['./country.component.scss']
 })
