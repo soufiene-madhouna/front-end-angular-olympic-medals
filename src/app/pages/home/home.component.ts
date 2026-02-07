@@ -57,15 +57,39 @@ export class HomeComponent implements OnInit {
     });
   }
 
+ /**
+   * Génère des couleurs distinctes de manière déterministe
+   * Utilise l'index pour générer une couleur stable
+   */
+  generateStableColors(count: number): string[] {
+    const colors: string[] = [];
+    const goldenRatioConjugate = 0.618033988749895;
+    let hue = 0.5; // Valeur fixe au lieu de Math.random()
+
+    for (let i = 0; i < count; i++) {
+      hue += goldenRatioConjugate;
+      hue %= 1;
+      
+      const saturation = 65 + (i % 3) * 5;
+      const lightness = 50 + (i % 2) * 10;
+      
+      colors.push(`hsl(${Math.floor(hue * 360)}, ${saturation}%, ${lightness}%)`);
+    }
+
+    return colors;
+  }
+
   private buildPieChart(countries: string[], sumOfAllMedalsYears: number[]): void {
+    const colors = this.generateStableColors(countries.length);
     const pieChart = new Chart("DashboardPieChart", {
+     
       type: 'pie',
       data: {
         labels: countries,
         datasets: [{
           label: 'Medals',
           data: sumOfAllMedalsYears,
-          backgroundColor: ['#0b868f', '#adc3de', '#7a3c53', '#8f6263', 'orange', '#94819d'],
+          backgroundColor:  colors,
           hoverOffset: 4
         }],
       },
