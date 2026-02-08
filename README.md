@@ -1,29 +1,192 @@
-# OlympicGamesStarter
+# Olympic Games - Application de visualisation
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.6.
+Une application web simple pour voir les statistiques des Jeux Olympiques avec des graphiques colorés.
 
-Don't forget to install your node_modules before starting (`npm install`).
+Angular 18.0.3
 
-## Development server
+---
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## C'est quoi ce projet ?
 
-## Build
+Cette application affiche :
+- Un graphique en camembert avec les médailles de chaque pays
+- Les détails d'un pays quand on clique dessus
+- Des statistiques (nombre de JO, nombre de pays, etc.)
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+---
 
-## Where to start
+##  Comment lancer le projet ?
 
-As you can see, an architecture has already been defined for the project. It is just a suggestion, you can choose to use your own. The predefined architecture includes (in addition to the default angular architecture) the following:
+### Étape 1 : Télécharger le code
+```bash
+git https://github.com/soufiene-madhouna/front-end-angular-olympic-medals
+cd front-end-angular-olympic-medals
+```
 
-- `components` folder: contains every reusable components
-- `pages` folder: contains components used for routing
-- `core` folder: contains the business logic (`services` and `models` folders)
+### Étape 2 : Installer les dépendances
+```bash
+npm install
+```
 
-I suggest you to start by understanding this starter code. Pay an extra attention to the `app-routing.module.ts` and the `olympic.service.ts`.
+>  Cela peut prendre quelques minutes la première fois
 
-Once mastered, you should continue by creating the typescript interfaces inside the `models` folder. As you can see I already created two files corresponding to the data included inside the `olympic.json`. With your interfaces, improve the code by replacing every `any` by the corresponding interface.
+### Étape 3 : Lancer l'application
+```bash
+npm start
+```
 
-You're now ready to implement the requested features.
+### Étape 4 : Ouvrir dans le navigateur
 
-Good luck!
+Allez sur : **http://localhost:4200**
+
+🎉 **C'est tout !** L'application est lancée.
+
+---
+
+## Structure du projet (simplifié)
+```
+olympic-games-dashboard/
+│
+├── src/app/
+│   ├── pages/
+│   │   ├── home/           ← Page d'accueil avec le graphique
+│   │   └── country/        ← Page de détail d'un pays
+│   │
+│   ├── services/           ← Code pour récupérer les données
+│   └── models/             ← Définition des types de données
+│
+├── src/assets/mock/
+│   └── olympic.json        ← Données des Jeux Olympiques
+│
+└── package.json            ← Liste des dépendances
+```
+
+---
+
+## Ce que vous devez avoir installé
+
+Avant de commencer, installez :
+
+1. **Node.js** (version 18 ou plus récente)
+   - Télécharger ici : https://nodejs.org/
+   - Vérifier : `node --version`
+
+2. **npm** (installé automatiquement avec Node.js)
+   - Vérifier : `npm --version`
+
+3. **Angular CLI**
+   - Installer : `npm install -g @angular/cli`
+   - Vérifier : `ng version`
+
+---
+
+## Commandes utiles
+```bash
+# Lancer l'application
+npm start
+
+# Arrêter l'application
+Ctrl + C (dans le terminal)
+
+# Installer une nouvelle dépendance
+npm install nom-du-package
+
+# Créer un build de production
+npm run build
+```
+
+---
+
+##  Comment ça marche ?
+
+### Page d'accueil
+1. Vous voyez un graphique avec tous les pays
+2. Cliquez sur un pays pour voir ses détails
+
+### Page détail
+1. Vous voyez les statistiques du pays
+2. Cliquez sur "Back" pour revenir à l'accueil
+
+---
+
+## Technologies utilisées
+
+- **Angular** : Framework pour créer l'application
+- **TypeScript** : Langage de programmation (comme JavaScript mais avec des types)
+- **Chart.js** : Bibliothèque pour créer les graphiques
+- **SCSS** : Pour les styles (CSS amélioré)
+
+---
+
+##  Fichiers importants
+
+| Fichier | Description |
+|---------|-------------|
+| `src/app/pages/home/` | Code de la page d'accueil |
+| `src/app/pages/country/` | Code de la page détail pays |
+| `src/app/services/olympic.service.ts` | Récupère les données |
+| `src/assets/mock/olympic.json` | Données des JO |
+| `package.json` | Liste des dépendances du projet |
+
+---
+
+## Problèmes fréquents
+
+### L'application ne démarre pas
+```bash
+# Supprimer node_modules et réinstaller
+rm -rf node_modules
+npm install
+npm start
+```
+
+### Port 4200 déjà utilisé
+```bash
+# Lancer sur un autre port
+ng serve --port 4300
+```
+
+### Erreur "ng: command not found"
+```bash
+# Installer Angular CLI
+npm install -g @angular/cli
+```
+
+---
+
+## 🆘 Besoin d'aide ?
+
+- **Documentation Angular** : https://angular.io/docs
+- **Documentation Chart.js** : https://www.chartjs.org/docs/
+- **Tutoriel TypeScript** : https://www.typescriptlang.org/docs/
+
+---
+
+## 📝 Pour aller plus loin
+
+Si vous voulez comprendre l'architecture du projet en détail, consultez :
+👉 [ARCHITECTURE.md](./ARCHITECTURE.md)
+
+---
+
+## ✅ Checklist pour débutant
+
+- [ ] J'ai installé Node.js
+- [ ] J'ai installé Angular CLI
+- [ ] J'ai cloné le projet
+- [ ] J'ai fait `npm install`
+- [ ] J'ai lancé `npm start`
+- [ ] L'application s'ouvre sur http://localhost:4200
+- [ ] Je peux cliquer sur les pays
+
+Si tout est coché, bravo ! 
+---
+
+## 👤 Auteur
+
+**Votre MADHOUNA**
+- Email : souf_madhouna@yahoo.fr
+
+---
+
+**Fait avec ❤️ et Angular**
