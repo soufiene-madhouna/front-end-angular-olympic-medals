@@ -26,7 +26,11 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.olympicService.getOlympicData().subscribe({
+   this.Olympic()
+  }
+
+   Olympic(): void {
+     this.olympicService.getOlympicData().subscribe({
       next: (data: OlympicData[]) => {
         console.log(`Liste des données : ${JSON.stringify(data)}`);
         if (data && data.length > 0) {
