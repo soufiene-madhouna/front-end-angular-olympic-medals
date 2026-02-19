@@ -1,5 +1,5 @@
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import Chart from 'chart.js/auto';
 import { ChartEvent } from 'chart.js';
@@ -22,7 +22,9 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private router: Router, 
-    private olympicService: OlympicService
+    private olympicService: OlympicService,
+    private cdr: ChangeDetectorRef  // ✅ nécessaire avec OnPush
+
   ) {}
 
   ngOnInit(): void {
@@ -30,33 +32,40 @@ export class HomeComponent implements OnInit {
   }
 
    Olympic(): void {
-     this.olympicService.getOlympicData().subscribe({
-      next: (data: OlympicData[]) => {
-        console.log(`Liste des données : ${JSON.stringify(data)}`);
+    // ✅ On s'abonne à olympics$ au lieu d'appeler getOlympicData()
+    this.olympicService.olympics$.subscribe({
+      next: (data: OlympicData[] | null) => {
+        // ✅ On vérifie que data n'est pas null (valeur initiale du BehaviorSubject)
         if (data && data.length > 0) {
-          // Extraction des années uniques
-          const allYears = data.flatMap((item: OlympicData) => 
+          const allYears = data.flatMap((item: OlympicData) =>
             item.participations.map((participation) => participation.year)
           );
           this.totalJOs = Array.from(new Set(allYears)).length;
 
-          // Extraction des pays
           const countries: string[] = data.map((item: OlympicData) => item.country);
           this.totalCountries = countries.length;
 
-          // Calcul du total des médailles par pays
-          const sumOfAllMedalsYears: number[] = data.map((item: OlympicData) => 
-            item.participations.reduce((acc: number, participation) => 
+          const sumOfAllMedalsYears: number[] = data.map((item: OlympicData) =>
+            item.participations.reduce((acc: number, participation) =>
               acc + participation.medalsCount, 0
             )
           );
 
+          // ✅ On détruit l'ancien chart avant d'en créer un nouveau
+          if (this.pieChart) {
+            this.pieChart.destroy();
+          }
+
           this.buildPieChart(countries, sumOfAllMedalsYears);
+          this.cdr.markForCheck();  // ✅ demande à Angular de re-vérifier le composant
+
         }
       },
       error: (error: HttpErrorResponse) => {
         console.log(`erreur : ${error}`);
-        this.error = error.message;
+        this.error = error.message
+        this.cdr.markForCheck();  // ✅ idem en cas d'erreur
+
       }
     });
   }
@@ -85,55 +94,90 @@ export class HomeComponent implements OnInit {
     return colors;
   }
 
-  private buildPieChart(countries: string[], sumOfAllMedalsYears: number[]): void {
-    const colors = this.generateStableColors(countries.length);
-    
-    const pieChart = new Chart("DashboardPieChart", {
-      type: 'pie',
-      data: {
-        labels: countries,
-        datasets: [{
-          label: 'Medals',
-          data: sumOfAllMedalsYears,
-          backgroundColor: colors,
-          borderWidth: 2,
-          borderColor: '#fff',
-          hoverOffset: this.isMobile() ? 5 : 10
-        }],
+ private buildPieChart(countries: string[], sumOfAllMedalsYears: number[]): void {
+  const colors = this.generateStableColors(countries.length);
+
+  const getResponsiveOptions = () => {
+    const width = window.innerWidth;
+    if (width <= 480) {
+      return { aspectRatio: 1, fontSize: 11, padding: 10, boxWidth: 30 };
+    } else if (width <= 768) {
+      return { aspectRatio: 1.5, fontSize: 12, padding: 12, boxWidth: 35 };
+    } else {
+      return { aspectRatio: 2.5, fontSize: 12, padding: 15, boxWidth: 40 };
+    }
+  };
+
+  const options = getResponsiveOptions();
+
+  const pieChart = new Chart("DashboardPieChart", {
+    type: 'pie',
+    data: {
+      labels: countries,
+      datasets: [{
+        label: 'Medals',
+        data: sumOfAllMedalsYears,
+        backgroundColor: colors,
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverOffset: this.isMobile() ? 5 : 10
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: options.aspectRatio,
+      // ✅ onClick au bon niveau (pas dans plugins)
+      onClick: (event: ChartEvent) => {
+        if (event.native) {
+          const points = pieChart.getElementsAtEventForMode(
+            event.native,
+            'point',
+            { intersect: true },
+            true
+          );
+
+          if (points.length) {
+            const firstPoint = points[0];
+            const countryName = pieChart.data.labels
+              ? pieChart.data.labels[firstPoint.index]
+              : '';
+            this.router.navigate(['country', countryName]);
+          }
+        }
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: {
-            position: this.isMobile() ? 'bottom' : 'right',
-            labels: {
-              padding: this.isMobile() ? 10 : 15,
-              font: {
-                size: this.isMobile() ? 10 : 12
-              }
-            }
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: {
+            padding: options.padding,
+            font: { size: options.fontSize },
+            boxWidth: options.boxWidth
           }
         },
-        onClick: (event: ChartEvent) => {
-          if (event.native) {
-            const points = pieChart.getElementsAtEventForMode(
-              event.native, 
-              'point', 
-              { intersect: true }, 
-              true
-            );
-            
-            if (points.length) {
-              const firstPoint = points[0];
-              const countryName = pieChart.data.labels ? pieChart.data.labels[firstPoint.index] : '';
-              this.router.navigate(['country', countryName]);
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              return `${label}: ${value} medals`;
             }
           }
         }
       }
-    });
-    
-    this.pieChart = pieChart;
-  }
+    }
+  });
+
+  this.pieChart = pieChart;
+
+  // ✅ Mise à jour du chart au resize de la fenêtre
+  window.addEventListener('resize', () => {
+    const newOptions = getResponsiveOptions();
+    if (this.pieChart) {
+      this.pieChart.options.aspectRatio = newOptions.aspectRatio;
+      this.pieChart.update();
+    }
+  });
+}   
 }
