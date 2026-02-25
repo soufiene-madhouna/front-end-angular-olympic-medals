@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, ParamMap, Router, RouterLink} from '@angular/router';
 import Chart from 'chart.js/auto';
 import { OlympicData, Participation } from 'src/app/models/olympicModel';
@@ -25,7 +25,9 @@ export class CountryComponent implements OnInit {
   constructor(
     private route: ActivatedRoute, 
     private router: Router, 
-    private olympicService: OlympicService
+    private olympicService: OlympicService,
+    private cdr: ChangeDetectorRef  // ✅ nécessaire avec OnPush
+    
   ) {}
 
   ngOnInit(): void {
@@ -36,39 +38,64 @@ export class CountryComponent implements OnInit {
       }
     });
   }
+private loadCountryData(countryName: string): void {
+  this.olympicService.olympics$.subscribe({
+    next: (data: OlympicData[] | null) => {  // ✅ accepter null
+      
+      // ✅ Guard clause si data est null (valeur initiale du BehaviorSubject)
+      if (!data || data.length === 0) return;
 
-  private loadCountryData(countryName: string): void {
-    this.olympicService.getOlympicData().subscribe({
-      next: (data: OlympicData[]) => {
-        if (data && data.length > 0) {
-          const selectedCountry = data.find((item: OlympicData) => item.country === countryName);
-          
-          if (!selectedCountry) {
-            this.error = 'Pays non trouvé';
-            return;
-          }
+      const selectedCountry = data.find(
+        (item: OlympicData) => item.country === countryName
+      );
 
-          this.titlePage = selectedCountry.country;
-          const participations = selectedCountry.participations;
-          this.totalEntries = participations.length;
-
-          const years: number[] = participations.map((participation: Participation) => participation.year);
-          const medals: number[] = participations.map((participation: Participation) => participation.medalsCount);
-          
-          this.totalMedals = medals.reduce((accumulator: number, count: number) => accumulator + count, 0);
-          
-          const athleteCounts: number[] = participations.map((participation: Participation) => participation.athleteCount);
-          this.totalAthletes = athleteCounts.reduce((accumulator: number, count: number) => accumulator + count, 0);
-          
-          this.buildChart(years, medals);
-        }
-      },
-      error: (error: HttpErrorResponse) => {
-        this.error = error.message;
+      // ✅ Redirection si pays non trouvé
+      if (!selectedCountry) {
+        this.error = 'Pays non trouvé';
+        this.cdr.markForCheck();
+        this.router.navigate(['/']);  // ✅ retour à l'accueil
+        return;
       }
-    });
-  }
 
+      this.titlePage = selectedCountry.country;
+      const participations = selectedCountry.participations;
+      this.totalEntries = participations.length;
+
+      const years: number[] = participations.map(
+        (p: Participation) => p.year
+      );
+      const medals: number[] = participations.map(
+        (p: Participation) => p.medalsCount
+      );
+
+      this.totalMedals = medals.reduce(
+        (acc: number, count: number) => acc + count, 0
+      );
+
+      const athleteCounts: number[] = participations.map(
+        (p: Participation) => p.athleteCount
+      );
+      this.totalAthletes = athleteCounts.reduce(
+        (acc: number, count: number) => acc + count, 0
+      );
+
+      // ✅ Détruire l'ancien chart avant d'en créer un nouveau
+      if (this.lineChart) {
+        this.lineChart.destroy();
+        this.lineChart = null!;
+      }
+
+      setTimeout(() => {
+        this.buildChart(years, medals);
+        this.cdr.markForCheck();  // ✅ notifier Angular avec OnPush
+      }, 0);
+    },
+    error: (error: HttpErrorResponse) => {
+      this.error = error.message;
+      this.cdr.markForCheck();  // ✅
+    }
+  });
+}
   private buildChart(years: number[], medals: number[]): void {
     const lineChart = new Chart("countryChart", {
       type: 'line',
