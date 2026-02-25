@@ -1,16 +1,13 @@
-import { provideHttpClient } from '@angular/common/http';
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { HomeComponent } from './pages/home/home.component';
-import { NotFoundComponent } from './pages/not-found/not-found.component';
-import { CountryComponent } from "./pages/country/country.component";
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
-@NgModule({
-  declarations: [AppComponent, HomeComponent, NotFoundComponent, CountryComponent],
-  imports: [BrowserModule, AppRoutingModule],
-  providers: [provideHttpClient()],
-  bootstrap: [AppComponent],
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet],
+  template: '<router-outlet></router-outlet>',
+  styleUrls: ['./app.component.scss']
 })
-export class AppModule {}
+export class AppComponent {
+  title = 'olympic-app';
+}

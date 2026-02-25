@@ -5,8 +5,11 @@ import Chart from 'chart.js/auto';
 import { ChartEvent } from 'chart.js';
 import { OlympicData, Participation } from '../../models/olympicModel';
 import { OlympicService } from 'src/app/services/OlympicService';
+import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-home',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
