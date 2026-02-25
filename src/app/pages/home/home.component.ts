@@ -4,29 +4,32 @@ import { Router } from '@angular/router';
 import Chart from 'chart.js/auto';
 import { ChartEvent } from 'chart.js';
 import { OlympicData, Participation } from '../../models/olympicModel';
+import { OlympicService } from 'src/app/services/OlympicService';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-private olympicUrl = './assets/mock/olympic.json';
   public pieChart!: Chart<"pie", number[], string>;
   public totalCountries: number = 0;
   public totalJOs: number = 0;
   public error!: string;
   titlePage: string = "Medals per Country";
 
-  constructor(private router: Router, private http: HttpClient) { }
+  constructor(
+    private router: Router, 
+    private olympicService: OlympicService
+  ) {}
 
   ngOnInit(): void {
-    this.http.get<OlympicData[]>(this.olympicUrl).subscribe({
+    this.olympicService.getOlympicData().subscribe({
       next: (data: OlympicData[]) => {
         console.log(`Liste des données : ${JSON.stringify(data)}`);
         if (data && data.length > 0) {
           // Extraction des années uniques
           const allYears = data.flatMap((item: OlympicData) => 
-            item.participations.map((participation: Participation) => participation.year)
+            item.participations.map((participation) => participation.year)
           );
           this.totalJOs = Array.from(new Set(allYears)).length;
 
@@ -36,7 +39,7 @@ private olympicUrl = './assets/mock/olympic.json';
 
           // Calcul du total des médailles par pays
           const sumOfAllMedalsYears: number[] = data.map((item: OlympicData) => 
-            item.participations.reduce((acc: number, participation: Participation) => 
+            item.participations.reduce((acc: number, participation) => 
               acc + participation.medalsCount, 0
             )
           );
@@ -51,7 +54,7 @@ private olympicUrl = './assets/mock/olympic.json';
     });
   }
 
-  buildPieChart(countries: string[], sumOfAllMedalsYears: number[]): void {
+  private buildPieChart(countries: string[], sumOfAllMedalsYears: number[]): void {
     const pieChart = new Chart("DashboardPieChart", {
       type: 'pie',
       data: {
@@ -86,4 +89,3 @@ private olympicUrl = './assets/mock/olympic.json';
     this.pieChart = pieChart;
   }
 }
-

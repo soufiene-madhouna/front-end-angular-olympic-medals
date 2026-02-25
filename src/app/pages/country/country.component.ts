@@ -3,6 +3,7 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import Chart from 'chart.js/auto';
 import { OlympicData, Participation } from 'src/app/models/olympicModel';
+import { OlympicService } from 'src/app/services/OlympicService';
 
 
 @Component({
@@ -11,8 +12,6 @@ import { OlympicData, Participation } from 'src/app/models/olympicModel';
   styleUrls: ['./country.component.scss']
 })
 export class CountryComponent implements OnInit {
- private olympicUrl = './assets/mock/olympic.json';
-  
   public lineChart!: Chart<"line", number[], number>;
   public titlePage: string = '';
   public totalEntries: number = 0;
@@ -23,7 +22,7 @@ export class CountryComponent implements OnInit {
   constructor(
     private route: ActivatedRoute, 
     private router: Router, 
-    private http: HttpClient
+    private olympicService: OlympicService
   ) {}
 
   ngOnInit(): void {
@@ -36,7 +35,7 @@ export class CountryComponent implements OnInit {
   }
 
   private loadCountryData(countryName: string): void {
-    this.http.get<OlympicData[]>(this.olympicUrl).subscribe({
+    this.olympicService.getOlympicData().subscribe({
       next: (data: OlympicData[]) => {
         if (data && data.length > 0) {
           const selectedCountry = data.find((item: OlympicData) => item.country === countryName);
